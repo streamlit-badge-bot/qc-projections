@@ -5,10 +5,13 @@ import numpy as np
 from get_qc_data import *
 from get_qc_predictions import *
 
+from datetime import date
+today = pd.to_datetime(date.today())
+
 # st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 qc_data, region_data_df, mtl_data_df, mtl_ed_df, qc_ed_stretcher_df = load_qc_data()
-total_cases_projections = load_qc_projections()
+total_cases_projections, total_deaths_projections = load_qc_projections()
 
 st.title('Quebec COVID-19 Dashboard')
 
@@ -47,6 +50,37 @@ total_cases_chart = alt.layer(
 ).interactive()
 
 st.altair_chart(total_cases_chart, use_container_width=True)
+
+total_deaths_data = pd.concat(
+    [qc_data[['date', 'total_deaths']], total_deaths_projections[total_deaths_projections.date > today]])
+
+# st.table(total_deaths_data)
+# source2 = source1.set_index('date').round(1).reset_index()
+# source2 = source2.reset_index(drop=True).melt(
+#     'date', var_name='category', value_name='y')
+
+# The basic line
+real_deaths_line = alt.Chart(total_deaths_data).mark_line().encode(
+    x=alt.X('monthdate(date)', title='Date'),
+    y=alt.Y('total_deaths:Q', title='Total Deaths'
+            )
+)
+# line2 = alt.Chart(total_cases_data).mark_line(strokeDash=[1, 1]).encode(
+#     x=alt.X('monthdate(date)', title='Date'),
+#     y=alt.Y('realistic:Q', title='Total Cases')
+# )
+
+predicted_deaths_area = real_deaths_line.mark_area(opacity=0.3).encode(
+    alt.Y('optimistic:Q', title='Total Deaths',
+          scale=scale),
+    alt.Y2('pessimistic:Q', title='Total Deaths')
+)
+
+total_deaths_chart = alt.layer(
+    real_deaths_line, predicted_deaths_area
+).interactive()
+
+st.altair_chart(total_deaths_chart, use_container_width=True)
 
 # realistic_pred_chart = alt.Chart(realistic).mark_line(strokeDash=[1, 1]).encode(
 #     x='monthdate(date)',

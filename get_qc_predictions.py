@@ -17,4 +17,9 @@ def load_qc_projections():
     total_cases_projections = optimistic.rename({'total_cases': 'optimistic'}, axis=1).merge(realistic.rename(
         {'total_cases': 'realistic'}, axis=1), on='date').merge(pessimistic.rename({'total_cases': 'pessimistic'}, axis=1), on='date')
 
-    return total_cases_projections
+    total_deaths_projections = pd.read_csv(
+        'https://www.dropbox.com/s/7kf3ge312j3czrw/projected_deaths.csv?dl=1')
+    total_deaths_projections.date = pd.to_datetime(
+        total_deaths_projections.date)
+
+    return total_cases_projections, total_deaths_projections
