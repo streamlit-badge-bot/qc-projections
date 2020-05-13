@@ -1,6 +1,8 @@
 import pandas as pd
+import streamlit as st
 
 
+@st.cache
 def load_qc_data():
     qc_data = pd.read_csv(
         'https://www.dropbox.com/s/ud7r3l20mzyllvm/qc-covid-stats.csv?dl=1')

@@ -1,6 +1,8 @@
 import pandas as pd
+import streamlit as st
 
 
+@st.cache
 def load_qc_projections():
     optimistic = pd.read_csv(
         'https://www.dropbox.com/s/8jytc10m2s79y1f/forecast_optimistic.csv?dl=1')

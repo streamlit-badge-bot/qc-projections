@@ -10,6 +10,7 @@ today = pd.to_datetime(date.today())
 
 # st.markdown(hide_menu_style, unsafe_allow_html=True)
 
+
 qc_data, region_data_df, mtl_data_df, mtl_ed_df, qc_ed_stretcher_df = load_qc_data()
 total_cases_projections, total_deaths_projections = load_qc_projections()
 
@@ -162,7 +163,9 @@ st.altair_chart(total_deaths_chart, use_container_width=True)
 # st.altair_chart(qc_death_hosp_icu, use_container_width=True)
 
 selected_regions = st.multiselect(
-    'Total cases by region(s)', region_data_df.region.unique().tolist(), default=['Montréal', 'Montérégie', 'Laval', 'Estrie', 'Mauricie - Centre du Québec'])  # default=region_data_df.region.unique().tolist()
+    'Total cases by region(s)', region_data_df.region.unique().tolist(),
+    default=['Montréal', 'Montérégie', 'Laval', 'Lanaudière'])
+# default=region_data_df.region.unique().tolist())
 regions_chart = alt.Chart(region_data_df[region_data_df.region.isin(selected_regions)].dropna()).mark_line(point=True).encode(
     x='monthdate(date)',
     y='total_case',
