@@ -36,7 +36,7 @@ def load_qc_data():
     mtl_ed_df = pd.read_csv(
         'https://www.dropbox.com/s/w7n297w7pnapezn/dailyMontrealEdStats.csv?dl=1')
     mtl_ed_df.date = pd.to_datetime(mtl_ed_df.date)
-    mtl_ed_df = mtl_ed_df[mtl_ed_df.date >= "2020-03-01"]
+    # mtl_ed_df = mtl_ed_df[mtl_ed_df.date >= "2020-03-01"]
 
     qc_ed_stretcher_df = pd.read_csv(
         'https://www.dropbox.com/s/7idv6buofuqru5z/hourlyQuebecEDStats.csv?dl=1')
