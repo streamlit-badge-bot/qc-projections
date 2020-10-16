@@ -1,5 +1,7 @@
 import pandas as pd
 import streamlit as st
+import requests
+from io import StringIO
 
 
 @st.cache
@@ -58,3 +60,30 @@ def load_qc_data():
 
     # return qc_data
     return qc_data, region_data_df, mtl_data_df, mtl_ed_df, qc_ed_stretcher_df
+
+
+@st.cache
+def load_arrondissement_data():
+    arrondissement_df = pd.read_csv(
+        'https://www.dropbox.com/s/n6xfww9zfk670l3/arrondissement-covid.csv?dl=1')
+    arrondissement_df.date = pd.to_datetime(arrondissement_df.date)
+    return arrondissement_df
+
+
+@st.cache
+def load_mtl_courbe():
+
+    url = "https://santemontreal.qc.ca/fileadmin/fichiers/Campagnes/coronavirus/situation-montreal/courbe.csv"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0"}
+    req = requests.get(url, headers=headers)
+    data = StringIO(req.text)
+
+    mtl_courbe_df = pd.read_csv(
+        data, sep=';', encoding="ISO-8859-1", engine='python')
+    mtl_courbe_df.Date = pd.to_datetime(mtl_courbe_df.Date)
+    mtl_courbe_df = mtl_courbe_df[['Date', 'Nouveaux cas', 'Cumulatif de cas']]
+    mtl_courbe_df = mtl_courbe_df.dropna()
+    mtl_courbe_df = mtl_courbe_df.rename(columns={
+                                         'Date': 'date', 'Nouveaux cas': 'new_cases', 'Cumulatif de cas': 'total_cases'})
+    return mtl_courbe_df

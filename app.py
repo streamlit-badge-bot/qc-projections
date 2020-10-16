@@ -6,8 +6,9 @@ import streamlit as st
 import numpy as np
 
 from streamlit import caching
-# caching.clear_cache()
+caching.clear_cache()
 
+st.beta_set_page_config(page_title=None, page_icon=None, layout='wide', initial_sidebar_state='auto')
 
 today = pd.to_datetime(date.today())
 
@@ -15,9 +16,11 @@ today = pd.to_datetime(date.today())
 
 
 qc_data, region_data_df, mtl_data_df, mtl_ed_df, qc_ed_stretcher_df = load_qc_data()
+arrondissement_df = load_arrondissement_data()
+mtl_courbe_df = load_mtl_courbe()
 # total_cases_projections, total_deaths_projections = load_qc_projections()
 
-st.title('Quebec EDs')
+# st.title('Quebec EDs')
 
 # prefer_log = st.checkbox('Log scale', False)
 # if prefer_log:
@@ -191,18 +194,20 @@ prefer_log = False
 # hospital_visit_slider = st.slider(
 #     'Days to display: ', min_value=7, max_value=90, value=14)
 selected_hospital_visits = st.multiselect('Montreal Emergency Department Visits', mtl_ed_df.Installation.unique().tolist(), default=[
-    "L'Hôpital général juif Sir Mortimer B. Davis", "Centre hospitalier de St. Mary", "Hôpital Royal Victoria", "Hôpital général de Montréal"])
+    "L'Hôpital général juif Sir Mortimer B. Davis", "Centre hospitalier de St. Mary", "Hôpital Royal Victoria", "Hôpital général de Montréal", 'Hôpital général du Lakeshore'])
 mtl_chart = alt.Chart(mtl_ed_df[mtl_ed_df.Installation.isin(selected_hospital_visits)].dropna()).mark_line(point=True).encode(
-    x='monthdate(date)',
+    # x='monthdate(date)',
+    x='date',
     y='Nombre inscriptions',
     color='Installation',
     tooltip=['date', 'Installation', 'Nombre inscriptions']
 ).interactive()  # .configure_legend(orient="bottom")
 st.altair_chart(mtl_chart, use_container_width=True)
 
-selected_hospital_stretchers = st.multiselect('Quebec Emergency Department Crowding', qc_ed_stretcher_df.installation.unique().tolist(), default=[
+st.subheader('Emergency Department Stretcher Occupancy')
+selected_hospital_stretchers = st.multiselect('Emergency Departments', qc_ed_stretcher_df.installation.unique().tolist(), default=[
     "L'Hôpital général Juif Sir Mortimer B. Davis", "Centre hospitalier de St. Mary", "Hôpital Royal Victoria", "Hôpital général de Montréal"])
-stretcher_chart = alt.Chart(qc_ed_stretcher_df[qc_ed_stretcher_df.installation.isin(selected_hospital_stretchers)].dropna()).mark_line(point=False).encode(
+stretcher_chart = alt.Chart(qc_ed_stretcher_df[qc_ed_stretcher_df.installation.isin(selected_hospital_stretchers)].dropna()).mark_line(point=True).encode(
     x="timestamp",
     y='occupied',
     color='installation',
@@ -210,3 +215,35 @@ stretcher_chart = alt.Chart(qc_ed_stretcher_df[qc_ed_stretcher_df.installation.i
         "timestamp", 'installation', 'occupied']
 ).interactive()  # .configure_legend(orient="bottom")
 st.altair_chart(stretcher_chart, use_container_width=True)
+
+st.subheader('Total cases by Montreal neighbourhood')
+selected_arrondissement = st.multiselect(
+    'Montreal Neighbourhoods',
+    arrondissement_df.arrondissement.unique().tolist(), default=['Côte-Saint-Luc', 'Outremont', 'Hampstead', 'Côte-des-Neiges–Notre-Dame-de-Grâce', 'Westmount'])
+mtl_chart = alt.Chart(arrondissement_df[arrondissement_df.arrondissement.isin(selected_arrondissement)]).mark_line(point=True).encode(
+    x='monthdate(date)',
+    y='total_case',
+    color='arrondissement',
+    tooltip=['date', 'arrondissement', 'total_case']
+).interactive()  # .configure_legend(orient="bottom")
+st.altair_chart(mtl_chart, use_container_width=True)
+
+# st.table(mtl_courbe_df)
+
+st.subheader('Montreal New Cases')
+mtl_new_cases = alt.Chart(mtl_courbe_df).mark_line(point=True).encode(
+    # x='monthdate(date)',
+    x='monthdate(date)',
+    y='new_cases',
+    tooltip=['date', 'new_cases']
+).interactive()  # .configure_legend(orient="bottom")
+st.altair_chart(mtl_new_cases, use_container_width=True)
+
+st.subheader('Montreal Total Cases')
+mtl_total_cases = alt.Chart(mtl_courbe_df).mark_line(point=False).encode(
+    # x='monthdate(date)',
+    x='monthdate(date)',
+    y='total_cases',
+    tooltip=['date', 'total_cases']
+).interactive()  # .configure_legend(orient="bottom")
+st.altair_chart(mtl_total_cases, use_container_width=True)
