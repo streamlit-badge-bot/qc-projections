@@ -1,1 +1,1 @@
-# qc-projections
+# qc-projections [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/drdevinhopkins/qc-projections/app.py)
